@@ -1,0 +1,17 @@
+services:
+  - type: web
+    name: chatapp
+    env: node
+    plan: free
+    buildCommand: npm install --prefix backend && npm install --include=dev --prefix frontend && npm run build --prefix frontend
+    startCommand: npm start --prefix backend
+    healthCheckPath: /
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: MONGODB_URI
+        sync: false
+      - key: JWT_TOKEN
+        sync: false
+      - key: CLIENT_URL
+        sync: false
