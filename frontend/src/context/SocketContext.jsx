@@ -13,10 +13,14 @@ export const SocketProvider = ({ children }) => {
   const [onlineUsers, setOnlineUsers] = useState([]);
   const [authUser] = useAuth();
   const userId = authUser?.user?._id;
-  const socket = useMemo(() => userId ? io("http://localhost:4005", {
+const backendUrl =
+    import.meta.env.VITE_BACKEND_URL ||
+    (import.meta.env.PROD ? window.location.origin : "http://localhost:4005");
+
+  const socket = useMemo(() => userId ? io(backendUrl, {
     query: { userId },
     autoConnect: false,
-  }) : null, [userId]);
+  }) : null, [userId, backendUrl]);
 
   useEffect(() => {
     if (!socket) return;
