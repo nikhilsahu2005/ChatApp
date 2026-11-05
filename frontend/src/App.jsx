@@ -1,6 +1,6 @@
-import React from "react";
-import Left from "./home/Leftpart/Left";
-import Right from "./home/Rightpart/Right";
+import { useState } from "react";
+import Left from "./home/leftpart/left";
+import Right from "./home/rightpart/right";
 import Signup from "./components/Signup";
 import Login from "./components/Login";
 import { useAuth } from "./context/AuthProvider";
@@ -8,8 +8,8 @@ import { Toaster } from "react-hot-toast";
 
 import { Navigate, Route, Routes } from "react-router-dom";
 function App() {
-  const [authUser, setAuthUser] = useAuth();
-  console.log(authUser);
+  const [authUser] = useAuth();
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   return (
     <>
       <Routes>
@@ -26,9 +26,11 @@ function App() {
                   id="my-drawer-2"
                   type="checkbox"
                   className="drawer-toggle"
+                  checked={isDrawerOpen}
+                  onChange={(event) => setIsDrawerOpen(event.target.checked)}
                 />
                 <div className="drawer-content flex flex-col items-center justify-center">
-                  <Right />
+                  <Right onOpenSidebar={() => setIsDrawerOpen(true)} />
                 </div>
                 <div className="drawer-side">
                   <label
@@ -37,7 +39,7 @@ function App() {
                     className="drawer-overlay"
                   ></label>
                   <ul className="menu w-80 min-h-full bg-black text-base-content">
-                    <Left />
+                    <Left onSelectUser={() => setIsDrawerOpen(false)} />
                   </ul>
                 </div>
               </div>

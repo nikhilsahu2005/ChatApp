@@ -1,13 +1,11 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { FaSearch } from "react-icons/fa";
 import toast from "react-hot-toast";
-import useGetAllUsers from "../../context/useGetAllUsers";
 import useConversation from "../../zustand/useConversation";
 
-function Search() {
+function Search({ allUsers, onSelect }) {
   const [search, setSearch] = useState("");
 
-  const [allUsers] = useGetAllUsers();
   const { setSelectedConversation } = useConversation();
 
   const handleSubmit = (e) => {
@@ -24,6 +22,7 @@ function Search() {
     if (conversation) {
       setSelectedConversation(conversation);
       setSearch("");
+      onSelect?.();
     } else {
       toast.error("User not found");
     }

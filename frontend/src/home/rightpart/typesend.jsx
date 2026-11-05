@@ -1,4 +1,4 @@
-  import React, { useState } from "react";
+  import { useState } from "react";
   import { IoSend } from "react-icons/io5";
   import useSendMessage from "../../context/useSendMessage.js";
 
@@ -8,8 +8,10 @@
 
     const handleSubmit = async (e) => {
       e.preventDefault();
-      await sendMessages(message);
-      setMessage("");
+      const sent = await sendMessages(message);
+      if (sent) {
+        setMessage("");
+      }
     };
 
     return (
@@ -21,11 +23,12 @@
               placeholder="Type here"
               value={message}
               onChange={(e) => setMessage(e.target.value)}
+              disabled={loading}
               className="border border-gray-700 rounded-xl outline-none mt-1 px-4 py-3 w-full"
             />
           </div>
 
-          <button>
+          <button type="submit" disabled={loading || !message.trim()}>
             <IoSend className="text-3xl" />
           </button>
         </div>

@@ -1,4 +1,5 @@
-import { createContext, useContext, useEffect, useState } from "react";
+/* eslint-disable react-refresh/only-export-components */
+import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import { useAuth } from "./AuthProvider";
 import io from "socket.io-client";
 
@@ -9,37 +10,29 @@ export const useSocketContext = () => {
 };
 
 export const SocketProvider = ({ children }) => {
-  const [socket, setSocket] = useState(null);
   const [onlineUsers, setOnlineUsers] = useState([]);
   const [authUser] = useAuth();
+  const userId = authUser?.user?._id;
+  const socket = useMemo(() => userId ? io("http://localhost:4005", {
+    query: { userId },
+    autoConnect: false,
+  }) : null, [userId]);
 
   useEffect(() => {
-    if (authUser) {
-      const newSocket = io("http://localhost:4005", {
-        query: {
-          userId: authUser.user._id,
-        },
-      });
+    if (!socket) return;
 
-      setSocket(newSocket);
+    const handleOnlineUsers = (users) => setOnlineUsers(users);
+    socket.on("getOnlineUsers", handleOnlineUsers);
+    socket.connect();
 
-      newSocket.on("getOnlineUsers", (users) => {
-        setOnlineUsers(users);
-      });
-
-      return () => {
-        newSocket.disconnect();
-      };
-    } else {
-      if (socket) {
-        socket.disconnect();
-        setSocket(null);
-      }
-    }
-  }, [authUser]);
+    return () => {
+      socket.off("getOnlineUsers", handleOnlineUsers);
+      socket.disconnect();
+    };
+  }, [socket]);
 
   return (
-    <socketContext.Provider value={{ socket, onlineUsers }}>
+    <socketContext.Provider value={{ socket, onlineUsers: socket ? onlineUsers : [] }}>
       {children}
     </socketContext.Provider>
   );

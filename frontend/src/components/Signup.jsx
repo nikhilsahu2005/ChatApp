@@ -1,22 +1,19 @@
-import React from "react";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import axios from "axios";
 import { useAuth } from "../context/AuthProvider";
 import { Link } from "react-router-dom";
 import toast from "react-hot-toast";
 function Signup() {
-  const [authUser, setAuthUser] = useAuth();
+  const [, setAuthUser] = useAuth();
   const {
     register,
     handleSubmit,
-    watch,
-    formState: { errors },
+    control,
+    formState: { errors, isSubmitting },
   } = useForm();
 
   // watch the password and confirm password fields
-  const password = watch("password", "");
-  const confirmPassword = watch("confirmPassword", "");
-  console.log(confirmPassword);
+  const password = useWatch({ control, name: "password", defaultValue: "" });
 
   const validatePasswordMatch = (value) => {
     return value === password || "Passwords do not match";
@@ -29,21 +26,23 @@ function Signup() {
       password: data.password,
       confirmPassword: data.confirmPassword,
     };
-    // console.log(userInfo);
-    await axios
-      .post("/api/user/signup", userInfo)
-      .then((response) => {
-        if (response.data) {
-          toast.success("Signup successful");
-        }
-        localStorage.setItem("ChatApp", JSON.stringify(response.data));
-        setAuthUser(response.data);
-      })
-      .catch((error) => {
-        if (error.response) {
-          toast.error("Error: " + error.response.data.error);
-        }
+    try {
+      const response = await axios.post("/api/user/signup", userInfo, {
+        withCredentials: true,
       });
+      toast.success("Signup successful");
+      localStorage.setItem("ChatApp", JSON.stringify(response.data));
+      setAuthUser(response.data);
+    } catch (error) {
+      const message = error.response?.data?.error;
+      const diagnostic = error.response?.data?.diagnostic;
+      toast.error(
+        message
+          ? `Signup failed: ${message}${diagnostic ? ` (${diagnostic})` : ""}`
+          : "Server se connect nahi ho raha. Backend terminal check karein."
+      );
+      console.error("Signup request failed:", error);
+    }
   };
   return (
     <>
@@ -173,8 +172,9 @@ function Signup() {
             </p>
             <input
               type="submit"
-              value="Signup"
-              className="text-white bg-green-500 px-2 py-1 cursor-pointer rounded-lg"
+              value={isSubmitting ? "Creating account..." : "Signup"}
+              disabled={isSubmitting}
+              className="text-white bg-green-500 px-2 py-1 cursor-pointer rounded-lg disabled:opacity-60"
             />
           </div>
         </form>

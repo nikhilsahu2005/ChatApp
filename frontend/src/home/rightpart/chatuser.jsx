@@ -1,8 +1,8 @@
-import React from "react";
 import useConversation from "../../zustand/useConversation.js";
 import { useSocketContext } from "../../context/SocketContext.jsx";
+import { CiMenuFries } from "react-icons/ci";
 
-function Chatuser() {
+function Chatuser({ onOpenSidebar }) {
   const { selectedConversation } = useConversation();
   const socketContext = useSocketContext();
 
@@ -20,6 +20,14 @@ function Chatuser() {
 
   return (
     <div className="flex items-center space-x-3 h-[8vh] bg-gray-800 hover:bg-gray-700 duration-300 px-4">
+      <button
+        type="button"
+        className="btn btn-ghost drawer-button lg:hidden"
+        aria-label="Open contacts"
+        onClick={onOpenSidebar}
+      >
+        <CiMenuFries className="text-white text-xl" />
+      </button>
       <div className={`avatar ${isOnline ? "avatar-online" : "avatar-offline"}`}>
         <div className="w-12 rounded-full">
           <img

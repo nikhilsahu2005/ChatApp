@@ -4,13 +4,25 @@ import useConversation from "../zustand/useConversation.js";
 
 const useGetSocketMessage = () => {
   const { socket } = useSocketContext();
-  const { setMessage } = useConversation();
+  const { setMessage, selectedConversation } = useConversation();
 
   useEffect(() => {
     if (!socket) return;
 
     const handleNewMessage = (newMessage) => {
-      setMessage((prev) => [...prev, newMessage]);
+      if (!selectedConversation?._id) return;
+
+      const isRelevant =
+        String(newMessage.senderId) === String(selectedConversation._id) ||
+        String(newMessage.receiverId) === String(selectedConversation._id);
+
+      if (!isRelevant) return;
+
+      setMessage((prev) =>
+        prev.some((message) => message._id === newMessage._id)
+          ? prev
+          : [...prev, newMessage]
+      );
     };
 
     socket.on("newMessage", handleNewMessage);
@@ -18,7 +30,7 @@ const useGetSocketMessage = () => {
     return () => {
       socket.off("newMessage", handleNewMessage);
     };
-  }, [socket, setMessage]);
+  }, [socket, selectedConversation, setMessage]);
 };
 
 export default useGetSocketMessage;

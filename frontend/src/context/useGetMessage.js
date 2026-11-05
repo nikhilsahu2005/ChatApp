@@ -10,29 +10,55 @@ const useGetMessage = () => {
     setMessage,
     selectedConversation,
   } = useConversation();
+  const conversationId = selectedConversation?._id;
 
   useEffect(() => {
+    let isCurrentRequest = true;
+
     const getMessages = async () => {
-      if (!selectedConversation?._id) return;
+      if (!conversationId) {
+        setLoading(false);
+        setMessage([]);
+        return;
+      }
 
       try {
         setLoading(true);
 
         const res = await axios.get(
-          `/api/message/get/${selectedConversation._id}`
+          `/api/message/get/${conversationId}`,
+          { withCredentials: true }
         );
 
-        setMessage(res.data || []);
+        if (isCurrentRequest) {
+          setMessage((currentMessages) => {
+            const messagesById = new Map(
+              (res.data || []).map((message) => [message._id, message])
+            );
+            currentMessages.forEach((message) => {
+              messagesById.set(message._id, message);
+            });
+            return [...messagesById.values()];
+          });
+        }
       } catch (error) {
-        console.log(error);
-        setMessage([]);
+        if (isCurrentRequest) {
+          console.error("Error in useGetMessage:", error);
+          setMessage([]);
+        }
       } finally {
-        setLoading(false);
+        if (isCurrentRequest) {
+          setLoading(false);
+        }
       }
     };
 
     getMessages();
-  }, [selectedConversation]);
+
+    return () => {
+      isCurrentRequest = false;
+    };
+  }, [conversationId, setMessage]);
 
   return { loading, messages };
 };

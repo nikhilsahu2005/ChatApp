@@ -1,8 +1,7 @@
-import React from "react";
 import useConversation from "../../zustand/useConversation.js";
 import { useSocketContext } from "../../context/SocketContext";
 
-function User({ user }) {
+function User({ user, onSelect }) {
   const { selectedConversation, setSelectedConversation } =
     useConversation();
 
@@ -13,7 +12,10 @@ function User({ user }) {
 
   return (
     <div
-      onClick={() => setSelectedConversation(user)}
+      onClick={() => {
+        setSelectedConversation(user);
+        onSelect?.();
+      }}
       className={`cursor-pointer hover:bg-slate-700 duration-300 ${
         isSelected ? "bg-slate-700" : ""
       }`}

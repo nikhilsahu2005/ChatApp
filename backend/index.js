@@ -11,12 +11,14 @@ import { app, server } from "./SocketIO/server.js";
 import userRoutes from "./routes/user.routes.js";
 import messageRoute from "./routes/message.route.js";
 
+const CLIENT_URL = process.env.CLIENT_URL || "http://localhost:5174";
+
 app.use(express.json());
 app.use(cookieParser());
 
 app.use(
   cors({
-    origin: "http://localhost:5174",
+    origin: CLIENT_URL,
     credentials: true,
   })
 );
@@ -25,6 +27,11 @@ app.use("/api/user", userRoutes);
 app.use("/api/message", messageRoute);
 
 const PORT = process.env.PORT || 4005;
+
+if (!process.env.MONGODB_URI || !process.env.JWT_TOKEN) {
+  console.error("Missing MONGODB_URI or JWT_TOKEN in backend/.env");
+  process.exit(1);
+}
 
 mongoose
   .connect(process.env.MONGODB_URI)

@@ -1,9 +1,9 @@
-import React from "react";
-
 function Message({ message }) {
-  const authUser = JSON.parse(localStorage.getItem("ChatApp"));
+  const stored = localStorage.getItem("ChatApp");
+  const authUser = stored ? JSON.parse(stored) : null;
 
   const itsMe =
+    !!authUser?.user?._id &&
     String(message.senderId) === String(authUser.user._id);
 
   const createdAt = new Date(message.createdAt);

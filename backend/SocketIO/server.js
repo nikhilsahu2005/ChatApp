@@ -1,13 +1,17 @@
+import dotenv from "dotenv";
 import { Server } from "socket.io";
 import http from "http";
 import express from "express";
 
+dotenv.config();
+
 const app = express();
 const server = http.createServer(app);
+const CLIENT_URL = process.env.CLIENT_URL || "http://localhost:5174";
 
 const io = new Server(server, {
   cors: {
-    origin: "http://localhost:5174",
+    origin: CLIENT_URL,
     methods: ["GET", "POST"],
     credentials: true,
   },
@@ -35,7 +39,7 @@ io.on("connection", (socket) => {
   socket.on("disconnect", () => {
     console.log("Socket Disconnected :", socket.id);
 
-    if (userId) {
+    if (userId && users[userId] === socket.id) {
       delete users[userId];
     }
 
