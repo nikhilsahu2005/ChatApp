@@ -9,10 +9,12 @@ const createTokenAndSaveCookie = (userId, res) => {
     }
   );
 
+  const isProduction = process.env.NODE_ENV === "production";
+
   res.cookie("jwt", token, {
     httpOnly: true,
-    secure: false,      // localhost ke liye false
-    sameSite: "lax",    // localhost ke liye lax
+    secure: isProduction,
+    sameSite: isProduction ? "none" : "lax",
     maxAge: 10 * 24 * 60 * 60 * 1000,
   });
 };
